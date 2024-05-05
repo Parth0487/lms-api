@@ -21,7 +21,7 @@ router.post('/login', async function (req, res, next) {
 
       FROM users u
 
-      LEFT JOIN userType ut ON ut.userTypeId = u.userType
+      LEFT JOIN usertype ut ON ut.userTypeId = u.userType
 
       WHERE email = '${req.body.email}'
 

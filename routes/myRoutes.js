@@ -30,7 +30,7 @@ router.post('/assignment', async function (req, res, next) {
   
       LEFT JOIN course c ON a.courseId = c.courseId
 
-      LEFT JOIN facultyCourse fc ON fc.courseId = c.courseId
+      LEFT JOIN facultycourse fc ON fc.courseId = c.courseId
   
       WHERE fc.facultyId = ${userId}
 
@@ -61,7 +61,7 @@ router.post('/assignment', async function (req, res, next) {
   
       LEFT JOIN course c ON a.courseId = c.courseId
 
-      LEFT JOIN studentCourse sc ON sc.courseId = c.courseId
+      LEFT JOIN studentcourse sc ON sc.courseId = c.courseId
   
       WHERE sc.studentId = ${userId} AND a.isPublished = 'yes'
 
@@ -177,7 +177,7 @@ router.post('/quiz', async function (req, res, next) {
     
         LEFT JOIN course c ON q.courseId = c.courseId
   
-        LEFT JOIN facultyCourse fc ON fc.courseId = c.courseId
+        LEFT JOIN facultycourse fc ON fc.courseId = c.courseId
     
         WHERE fc.facultyId = ${userId}
   
@@ -209,7 +209,7 @@ router.post('/quiz', async function (req, res, next) {
     
         LEFT JOIN course c ON q.courseId = c.courseId
   
-        LEFT JOIN studentCourse sc ON sc.courseId = c.courseId
+        LEFT JOIN studentcourse sc ON sc.courseId = c.courseId
     
         WHERE sc.studentId = ${userId} AND q.isPublished = 'yes'
   
@@ -377,7 +377,7 @@ router.post('/student-score-list', async function (req, res, next) {
       s.score,
       s.type
       FROM users u
-      LEFT JOIN studentCourse sc ON sc.studentId = u.userId AND sc.courseId = ${courseId}
+      LEFT JOIN studentcourse sc ON sc.studentId = u.userId AND sc.courseId = ${courseId}
       JOIN assignment a ON a.courseId = sc.courseId AND a.assignmentId = ${assignmentId}
       LEFT JOIN score s ON s.referenceId = a.assignmentId AND s.type = 'assignment' AND s.userId = u.userId
       WHERE u.userType = 3;
@@ -394,7 +394,7 @@ router.post('/student-score-list', async function (req, res, next) {
       s.score,
       s.type
       FROM users u
-      LEFT JOIN studentCourse sc ON sc.studentId = u.userId AND sc.courseId = ${courseId}
+      LEFT JOIN studentcourse sc ON sc.studentId = u.userId AND sc.courseId = ${courseId}
       JOIN quiz q ON q.courseId = sc.courseId AND q.quizId = ${quizId}
       LEFT JOIN score s ON s.referenceId = q.quizId AND s.type = 'quiz' AND s.userId = u.userId
       WHERE u.userType = 3;
@@ -486,7 +486,7 @@ router.post('/course', async function (req, res, next) {
     (
       SELECT GROUP_CONCAT(u.name SEPARATOR ', ')
       FROM users u
-      JOIN facultyCourse fc ON u.userId = fc.facultyId
+      JOIN facultycourse fc ON u.userId = fc.facultyId
       WHERE ${subQueryWhere.join(' AND ')}
     ) AS facultyNames
    
@@ -494,7 +494,7 @@ router.post('/course', async function (req, res, next) {
 
     LEFT JOIN semester s ON c.semesterId = s.semesterId
 
-    LEFT JOIN facultyCourse fc ON fc.courseId = c.courseId
+    LEFT JOIN facultycourse fc ON fc.courseId = c.courseId
     LEFT JOIN users u on u.userId = fc.facultyId
 
     WHERE ${where.join(' AND ')}
@@ -552,12 +552,12 @@ router.get('/course/:id', async function (req, res, next) {
       (
         SELECT GROUP_CONCAT(u.name SEPARATOR ', ')
         FROM users u
-        JOIN facultyCourse fc ON u.userId = fc.facultyId
+        JOIN facultycourse fc ON u.userId = fc.facultyId
       ) AS facultyNames,
 
       (
         SELECT COUNT(*)
-        FROM facultyCourse fc
+        FROM facultycourse fc
         WHERE fc.courseId = ${courseId}
         
         GROUP BY fc.courseId
@@ -565,7 +565,7 @@ router.get('/course/:id', async function (req, res, next) {
 
       (
         SELECT COUNT(*)
-        FROM studentCourse sc
+        FROM studentcourse sc
         WHERE sc.courseId = ${courseId}
         GROUP BY sc.courseId
       ) AS totalStudents
@@ -575,7 +575,7 @@ router.get('/course/:id', async function (req, res, next) {
 
       LEFT JOIN semester s ON c.semesterId = s.semesterId
 
-      LEFT JOIN facultyCourse fc ON fc.courseId = c.courseId
+      LEFT JOIN facultycourse fc ON fc.courseId = c.courseId
       LEFT JOIN users u on u.userId = fc.facultyId
 
       WHERE ${where.join(' AND ')}
@@ -601,7 +601,7 @@ router.post('/add-user-to-course', async function (req, res, next) {
     console.log(req.body);
     const { userId = [], type = null, courseId } = req.body;
 
-    let tableName = type === 'student' ? 'studentCourse' : 'facultyCourse';
+    let tableName = type === 'student' ? 'studentcourse' : 'facultycourse';
 
     // Construct the values string for multiple insert
     let values = userId.map(id => `(${id}, ${courseId})`).join(', ');
@@ -632,7 +632,7 @@ router.get('/student-by-course/:id', async function (req, res, next) {
 
     WHERE u.userId ${includeStudent === 'yes' ? 'NOT IN' : 'IN'} (
         SELECT sc.studentId 
-        FROM studentCourse sc 
+        FROM studentcourse sc 
         WHERE sc.courseId = ${courseId} 
       ) AND u.userType = 3
 
@@ -665,7 +665,7 @@ router.get('/faculty-by-course/:id', async function (req, res, next) {
 
     WHERE u.userId ${includeFaculty === 'yes' ? 'NOT IN' : 'IN'} (
         SELECT fc.facultyId 
-        FROM facultyCourse fc 
+        FROM facultycourse fc 
         WHERE fc.courseId = ${courseId} 
       ) AND u.userType = 2
 
