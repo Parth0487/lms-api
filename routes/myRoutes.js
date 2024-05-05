@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const db = require('../config/db');
+const db = require('../utils/db');
 
 // Assignments
 router.post('/assignment', async function (req, res, next) {

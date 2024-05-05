@@ -1,5 +1,5 @@
 var express = require('express');
-const db = require('../config/db');
+const db = require('../utils/db');
 var router = express.Router();
 
 /* GET users listing. */

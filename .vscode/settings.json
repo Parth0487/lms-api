@@ -1,0 +1,20 @@
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "prettier.printWidth": 150,
+  "prettier.tabWidth": 2,
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all",
+  "prettier.jsxSingleQuote": true,
+  "prettier.bracketSameLine": false,
+  "prettier.semi": true,
+  "prettier.useTabs": false,
+  "prettier.bracketSpacing": true,
+  "prettier.arrowParens": "avoid"
+}
