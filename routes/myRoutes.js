@@ -21,6 +21,10 @@ router.post('/assignment', async function (req, res, next) {
       a.date,
       a.point,
       a.isPublished,
+
+      s.semesterId,
+
+      s.semesterName,
   
       c.courseId, c.title AS courseTitle,
 
@@ -31,6 +35,8 @@ router.post('/assignment', async function (req, res, next) {
       LEFT JOIN course c ON a.courseId = c.courseId
 
       LEFT JOIN facultycourse fc ON fc.courseId = c.courseId
+
+      LEFT JOIN semester s ON s.semesterId = c.semesterId
   
       WHERE fc.facultyId = ${userId}
 
@@ -168,8 +174,12 @@ router.post('/quiz', async function (req, res, next) {
         q.point,
         q.isPublished,
         q.questions,
+
+        s.semesterId,
+        s.semesterName,
     
-        c.courseId, c.title AS courseTitle,
+        c.courseId, 
+        c.title AS courseTitle,
   
         fc.facultyId
     
@@ -178,6 +188,8 @@ router.post('/quiz', async function (req, res, next) {
         LEFT JOIN course c ON q.courseId = c.courseId
   
         LEFT JOIN facultycourse fc ON fc.courseId = c.courseId
+
+        LEFT JOIN semester s ON s.semesterId = c.semesterId
     
         WHERE fc.facultyId = ${userId}
   
@@ -200,8 +212,12 @@ router.post('/quiz', async function (req, res, next) {
         q.point,
         q.isPublished,
         q.questions,
+
+        s.semesterId,
+        s.semesterName,
     
-        c.courseId, c.title AS courseTitle,
+        c.courseId, 
+        c.title AS courseTitle,
   
         sc.studentId
     
@@ -210,6 +226,8 @@ router.post('/quiz', async function (req, res, next) {
         LEFT JOIN course c ON q.courseId = c.courseId
   
         LEFT JOIN studentcourse sc ON sc.courseId = c.courseId
+        
+        LEFT JOIN semester s ON s.semesterId = c.semesterId
     
         WHERE sc.studentId = ${userId} AND q.isPublished = 'yes'
   
