@@ -60,6 +60,10 @@ router.post('/assignment', async function (req, res, next) {
       a.isPublished,
   
       c.courseId, c.title AS courseTitle,
+    
+      s.semesterId,
+
+      s.semesterName,
 
       sc.studentId
   
@@ -68,6 +72,8 @@ router.post('/assignment', async function (req, res, next) {
       LEFT JOIN course c ON a.courseId = c.courseId
 
       LEFT JOIN studentcourse sc ON sc.courseId = c.courseId
+
+      LEFT JOIN semester s ON s.semesterId = c.semesterId
   
       WHERE sc.studentId = ${userId} AND a.isPublished = 'yes'
 
@@ -478,7 +484,7 @@ router.post('/course', async function (req, res, next) {
 
     let subQueryWhere = [' fc.courseId = c.courseId ', ' fc.facultyId = u.userId '];
 
-    const { faculty = [], semester = [] } = req.body;
+    const { faculty = [], semester = [], student = [], userTypeCode = null } = req.body;
 
     if (faculty && faculty.length) {
       subQueryWhere.push(` fc.facultyId IN (${faculty.join(',')})  `);
@@ -489,37 +495,66 @@ router.post('/course', async function (req, res, next) {
       where.push(` s.semesterId IN (${semester.join(',')}) `);
     }
 
-    let query = `
-    SELECT 
-    c.courseId,
-    c.title,
-    c.description,
-    c.semesterId,
-    c.isPublished,
+    if (student && student.length) {
+      where.push(` sc.studentId IN (${student.join(',')}) `);
+    }
 
-    s.semesterId,
-    s.semesterName,
-    s.semesterDuration,
+    let query = ``;
 
-    (
-      SELECT GROUP_CONCAT(u.name SEPARATOR ', ')
-      FROM users u
-      JOIN facultycourse fc ON u.userId = fc.facultyId
-      WHERE ${subQueryWhere.join(' AND ')}
-    ) AS facultyNames
-   
-    FROM course c
-
-    LEFT JOIN semester s ON c.semesterId = s.semesterId
-
-    LEFT JOIN facultycourse fc ON fc.courseId = c.courseId
-    LEFT JOIN users u on u.userId = fc.facultyId
-
-    WHERE ${where.join(' AND ')}
-
-    GROUP BY c.courseId
-
-  `;
+    if (userTypeCode === 'STUDENT') {
+      query = `
+      SELECT 
+      c.courseId,
+      c.title,
+      c.description,
+      c.semesterId,
+      c.isPublished,
+  
+      s.semesterId,
+      s.semesterName,
+      s.semesterDuration
+     
+      FROM course c
+  
+      LEFT JOIN semester s ON c.semesterId = s.semesterId
+  
+      LEFT JOIN studentcourse sc ON sc.courseId = c.courseId
+      LEFT JOIN users u on u.userId = sc.studentId
+  
+      WHERE ${where.join(' AND ')}
+  
+      GROUP BY c.courseId `;
+    } else {
+      query = `
+      SELECT 
+      c.courseId,
+      c.title,
+      c.description,
+      c.semesterId,
+      c.isPublished,
+  
+      s.semesterId,
+      s.semesterName,
+      s.semesterDuration,
+  
+      (
+        SELECT GROUP_CONCAT(u.name SEPARATOR ', ')
+        FROM users u
+        JOIN facultycourse fc ON u.userId = fc.facultyId
+        WHERE ${subQueryWhere.join(' AND ')}
+      ) AS facultyNames
+     
+      FROM course c
+  
+      LEFT JOIN semester s ON c.semesterId = s.semesterId
+  
+      LEFT JOIN facultycourse fc ON fc.courseId = c.courseId
+      LEFT JOIN users u on u.userId = fc.facultyId
+  
+      WHERE ${where.join(' AND ')}
+  
+      GROUP BY c.courseId `;
+    }
 
     let list = await db.customQuery(query);
 
